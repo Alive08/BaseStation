@@ -55,5 +55,8 @@ Part of DCC++ BASE STATION for the Arduino
 #define MAC_ADDRESS {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF }
 
 /////////////////////////////////////////////////////////////////////////////////////
+//
+// DEFINE IF MCP23017 PORT EXPANDER(S) WILL BE USED FOR SENSORS
+//
 
 #define USE_MCP23017
