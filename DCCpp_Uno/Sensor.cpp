@@ -60,15 +60,26 @@ decide to ignore the <q ID> return and only react to <Q ID> triggers.
 #include "EEStore.h"
 #include <EEPROM.h>
 #include "Comm.h"
+#include "Expander.h"
 
 ///////////////////////////////////////////////////////////////////////////////
   
-void Sensor::check(){    
+void Sensor::check(){
   Sensor *tt;
 
   for(tt=firstSensor;tt!=NULL;tt=tt->nextSensor){
-    tt->signal=tt->signal*(1.0-SENSOR_DECAY)+digitalRead(tt->data.pin)*SENSOR_DECAY;
-    
+    #ifdef USE_MCP23017
+      byte mcp_idx, mcp_pin;
+      if(tt->data.pin >= MAX_BOARD_PORTS) {
+        mcp_idx = get_mcp_idx(tt->data.pin);
+        mcp_pin = get_mcp_pin(tt->data.pin, mcp_idx);
+        tt->signal=tt->signal*(1.0-SENSOR_DECAY)+mcp[mcp_idx]->digitalRead(mcp_pin)*SENSOR_DECAY;
+      } else {
+        tt->signal=tt->signal*(1.0-SENSOR_DECAY)+digitalRead(tt->data.pin)*SENSOR_DECAY;
+      }
+    #else
+      tt->signal=tt->signal*(1.0-SENSOR_DECAY)+digitalRead(tt->data.pin)*SENSOR_DECAY;
+    #endif    
     if(!tt->active && tt->signal<0.5){
       tt->active=true;
       INTERFACE.print("<Q");
@@ -111,8 +122,21 @@ Sensor *Sensor::create(int snum, int pin, int pullUp, int v){
   tt->data.pullUp=(pullUp==0?LOW:HIGH);
   tt->active=false;
   tt->signal=1;
-  pinMode(pin,INPUT);         // set mode to input
-  digitalWrite(pin,pullUp);   // don't use Arduino's internal pull-up resistors for external infrared sensors --- each sensor must have its own 1K external pull-up resistor
+  #ifdef USE_MCP23017
+    byte mcp_idx, mcp_pin;
+    if(tt->data.pin >= MAX_BOARD_PORTS) {
+      mcp_idx = get_mcp_idx(pin);
+      mcp_pin = get_mcp_pin(pin, mcp_idx);
+      mcp[mcp_idx]->pinMode(mcp_pin, INPUT);
+      mcp[mcp_idx]->pullUp(mcp_pin, pullUp);
+    } else {
+      pinMode(pin,INPUT);         // set mode to input
+      digitalWrite(pin,pullUp);   // don't use Arduino's internal pull-up resistors for external infrared sensors --- each sensor must have its own 1K external pull-up resistor
+    }
+  #else
+    pinMode(pin,INPUT);         // set mode to input
+    digitalWrite(pin,pullUp);   // don't use Arduino's internal pull-up resistors for external infrared sensors --- each sensor must have its own 1K external pull-up resistor
+  #endif
 
   if(v==1)
     INTERFACE.print("<O>");

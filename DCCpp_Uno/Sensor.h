@@ -38,4 +38,3 @@ struct Sensor{
 }; // Sensor
 
 #endif
-

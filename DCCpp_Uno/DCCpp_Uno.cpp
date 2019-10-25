@@ -167,7 +167,8 @@ DCC++ BASE STATION is configured through the Config.h file that contains all use
 **********************************************************************/
 
 // BEGIN BY INCLUDING THE HEADER FILES FOR EACH MODULE
- 
+#include <Arduino.h>
+
 #include "DCCpp_Uno.h"
 #include "PacketRegister.h"
 #include "CurrentMonitor.h"
@@ -177,6 +178,7 @@ DCC++ BASE STATION is configured through the Config.h file that contains all use
 #include "EEStore.h"
 #include "Config.h"
 #include "Comm.h"
+#include "Expander.h"
 
 void showConfiguration();
 
@@ -222,6 +224,11 @@ void setup(){
   Serial.begin(115200);            // configure serial interface
   Serial.flush();
 
+  #ifdef USE_MCP23017
+    Wire.begin();
+    i2c_scan();
+  #endif
+
   #ifdef SDCARD_CS
     pinMode(SDCARD_CS,OUTPUT);
     digitalWrite(SDCARD_CS,HIGH);     // Deselect the SD card
@@ -229,9 +236,9 @@ void setup(){
 
   EEStore::init();                                          // initialize and load Turnout and Sensor definitions stored in EEPROM
 
-  pinMode(A5,INPUT);                                       // if pin A5 is grounded upon start-up, print system configuration and halt
-  digitalWrite(A5,HIGH);
-  if(!digitalRead(A5))
+  pinMode(A3,INPUT);                                       // if pin A3 is grounded upon start-up, print system configuration and halt
+  digitalWrite(A3,HIGH);
+  if(!digitalRead(A3))
     showConfiguration();
 
   Serial.print("<iDCC++ BASE STATION FOR ARDUINO ");      // Print Status to Serial Line regardless of COMM_TYPE setting so use can open Serial Monitor and check configurtion 
@@ -268,6 +275,9 @@ void setup(){
     Serial.print(">");
   #endif
   
+  #ifdef USE_MCP23017
+      show_expanders();
+  #endif
   // CONFIGURE TIMER_1 TO OUTPUT 50% DUTY CYCLE DCC SIGNALS ON OC1B INTERRUPT PINS
   
   // Direction Pin for Motor Shield Channel A - MAIN OPERATIONS TRACK
