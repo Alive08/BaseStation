@@ -32,12 +32,16 @@ uint8_t get_mcp_pin(int pin, uint8_t mcp_idx) {
 
 void show_expanders() {
     Serial.print("<PORT EXPANDERS:");
+    boolean filled = 0;
     for(uint8_t i = 0; i <= (MCP23017_MAX_I2C_ADDR - MCP23017_MIN_I2C_ADDR); i++) {
         if(mcp[i]) {
+            filled++;
             Serial.print(" MCP23017 #");
             Serial.print(i);
         }
     }
+    if (! filled)
+        Serial.print(" NONE");
     Serial.print(">");
     return;
 }

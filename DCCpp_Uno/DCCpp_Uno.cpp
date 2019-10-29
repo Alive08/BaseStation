@@ -221,7 +221,12 @@ void loop(){
 
 void setup(){  
 
-  Serial.begin(115200);            // configure serial interface
+  #ifdef ARDUINO_AVR_PRO
+    Serial.begin(57600);
+  #else
+    Serial.begin(115200);            // configure serial interface
+  #endif
+  
   Serial.flush();
 
   #ifdef USE_MCP23017
