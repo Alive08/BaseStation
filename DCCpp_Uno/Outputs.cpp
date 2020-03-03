@@ -77,12 +77,26 @@ the state of any outputs being monitored or controlled by a separate interface o
 #include "EEStore.h"
 #include <EEPROM.h>
 #include "Comm.h"
+#ifdef USE_MCP23017
+#include "Expander.h"
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void Output::activate(int s){
   data.oStatus=(s>0);                                               // if s>0, set status to active, else inactive
-  digitalWrite(data.pin,data.oStatus ^ bitRead(data.iFlag,0));      // set state of output pin to HIGH or LOW depending on whether bit zero of iFlag is set to 0 (ACTIVE=HIGH) or 1 (ACTIVE=LOW)
+  #ifdef USE_MCP23017
+      byte mcp_idx, mcp_pin;
+      if(data.pin >= MAX_BOARD_PORTS) {
+        mcp_idx = get_mcp_idx(data.pin);
+        mcp_pin = get_mcp_pin(data.pin, mcp_idx);
+          mcp[mcp_idx]->digitalWrite(mcp_pin, data.oStatus ^ bitRead(data.iFlag,0));      // set state of output pin to HIGH or LOW depending on whether bit zero of iFlag is set to 0 (ACTIVE=HIGH) or 1 (ACTIVE=LOW)
+      } else {
+          digitalWrite(data.pin,data.oStatus ^ bitRead(data.iFlag,0));
+      }
+    #else
+        digitalWrite(data.pin,data.oStatus ^ bitRead(data.iFlag,0));
+    #endif    
   if(num>0)
     EEPROM.put(num,data.oStatus);
   INTERFACE.print("<Y");
@@ -188,8 +202,21 @@ void Output::load(){
     EEPROM.get(EEStore::pointer(),data);  
     tt=create(data.id,data.pin,data.iFlag);
     tt->data.oStatus=bitRead(tt->data.iFlag,1)?bitRead(tt->data.iFlag,2):data.oStatus;      // restore status to EEPROM value is bit 1 of iFlag=0, otherwise set to value of bit 2 of iFlag
+  #ifdef USE_MCP23017
+    byte mcp_idx, mcp_pin;
+    if(tt->data.pin >= MAX_BOARD_PORTS) {
+      mcp_idx = get_mcp_idx(tt->data.pin);
+      mcp_pin = get_mcp_pin(tt->data.pin, mcp_idx);
+      mcp[mcp_idx]->digitalWrite(mcp_pin,tt->data.oStatus ^ bitRead(tt->data.iFlag,0));
+      mcp[mcp_idx]->pinMode(mcp_pin, OUTPUT);
+    } else {
+      digitalWrite(tt->data.pin,tt->data.oStatus ^ bitRead(tt->data.iFlag,0));
+      pinMode(tt->data.pin,OUTPUT);
+    }
+  #else
     digitalWrite(tt->data.pin,tt->data.oStatus ^ bitRead(tt->data.iFlag,0));
     pinMode(tt->data.pin,OUTPUT);
+  #endif
     tt->num=EEStore::pointer();
     EEStore::advance(sizeof(tt->data));
   }  
@@ -239,10 +266,23 @@ Output *Output::create(int id, int pin, int iFlag, int v){
   tt->data.iFlag=iFlag;
   tt->data.oStatus=0;
   
-  if(v==1){
+  if(v==1) {
     tt->data.oStatus=bitRead(tt->data.iFlag,1)?bitRead(tt->data.iFlag,2):0;      // sets status to 0 (INACTIVE) is bit 1 of iFlag=0, otherwise set to value of bit 2 of iFlag  
+  #ifdef USE_MCP23017
+    byte mcp_idx, mcp_pin;
+    if(tt->data.pin >= MAX_BOARD_PORTS) {
+      mcp_idx = get_mcp_idx(tt->data.pin);
+      mcp_pin = get_mcp_pin(tt->data.pin, mcp_idx);
+      mcp[mcp_idx]->digitalWrite(mcp_pin,tt->data.oStatus ^ bitRead(tt->data.iFlag,0));
+      mcp[mcp_idx]->pinMode(mcp_pin, OUTPUT);
+    } else {
+      digitalWrite(tt->data.pin,tt->data.oStatus ^ bitRead(tt->data.iFlag,0));
+      pinMode(tt->data.pin,OUTPUT);
+    }
+  #else
     digitalWrite(tt->data.pin,tt->data.oStatus ^ bitRead(tt->data.iFlag,0));
     pinMode(tt->data.pin,OUTPUT);
+  #endif
     INTERFACE.print("<O>");
   }
   

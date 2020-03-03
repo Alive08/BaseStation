@@ -241,10 +241,12 @@ void setup(){
 
   EEStore::init();                                          // initialize and load Turnout and Sensor definitions stored in EEPROM
 
+  /* vadim - to free one more digital pin
   pinMode(A3,INPUT);                                       // if pin A3 is grounded upon start-up, print system configuration and halt
   digitalWrite(A3,HIGH);
   if(!digitalRead(A3))
     showConfiguration();
+  */
 
   Serial.print("<iDCC++ BASE STATION FOR ARDUINO ");      // Print Status to Serial Line regardless of COMM_TYPE setting so use can open Serial Monitor and check configurtion 
   Serial.print(ARDUINO_TYPE);

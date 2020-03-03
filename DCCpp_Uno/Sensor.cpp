@@ -60,7 +60,9 @@ decide to ignore the <q ID> return and only react to <Q ID> triggers.
 #include "EEStore.h"
 #include <EEPROM.h>
 #include "Comm.h"
+#ifdef USE_MCP23017
 #include "Expander.h"
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
   
