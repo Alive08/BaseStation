@@ -496,8 +496,6 @@ ISR(TIMER3_COMPB_vect){              // set interrupt service for OCR3B of TIMER
 
 void showConfiguration(){
 
-  // int mac_address[]=MAC_ADDRESS;
-
   Serial.print("\n*** DCC++ CONFIGURATION ***\n");
 
   Serial.print("\nVERSION:      ");
