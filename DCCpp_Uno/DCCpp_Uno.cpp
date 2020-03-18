@@ -222,7 +222,7 @@ void loop(){
 void setup(){  
 
   #ifdef ARDUINO_AVR_PRO
-    Serial.begin(57600);
+    Serial.begin(115200);
   #else
     Serial.begin(115200);            // configure serial interface
   #endif
