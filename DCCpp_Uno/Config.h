@@ -32,6 +32,8 @@ Part of DCC++ BASE STATION for the Arduino
 //  3 = Seeed Studio Ethernet/SD-Card Shield W5200
 
 #define COMM_INTERFACE   0
+// add-on for Mega WiFi by vadim
+#define MEGA_WIFI true
 
 /////////////////////////////////////////////////////////////////////////////////////
 //

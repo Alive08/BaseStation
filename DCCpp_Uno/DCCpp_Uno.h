@@ -99,7 +99,12 @@ Part of DCC++ BASE STATION for the Arduino
 #if COMM_INTERFACE == 0
 
   #define COMM_TYPE 0
-  #define INTERFACE Serial
+
+  #ifdef MEGA_WIFI
+    #define INTERFACE Serial3
+  #else
+    #define INTERFACE Serial
+  #endif
 
 #elif (COMM_INTERFACE==1) || (COMM_INTERFACE==2) || (COMM_INTERFACE==3)
 

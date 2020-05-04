@@ -254,7 +254,14 @@ void setup(){
     #endif
     INTERFACE.begin();
   #endif
-             
+
+  #if COMM_TYPE == 0
+    #ifdef MEGA_WIFI
+      INTERFACE.begin(115200);
+      INTERFACE.flush();
+    #endif
+  #endif
+
   SerialCommand::init(&mainRegs, &progRegs, &mainMonitor);   // create structure to read and parse commands from serial line
 
   Serial.print("<N");
